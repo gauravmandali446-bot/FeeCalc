@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <title>FeeCalc - Free Stripe, PayPal & Upwork Fee Calculator</title>
+    <meta name="description" content="Calculate transaction fees for Stripe, PayPal, and Upwork instantly. Find out how much you keep, or use the reverse calculator to see exactly how much you need to charge.">
+    <meta name="keywords" content="fee calculator, stripe fee calculator, paypal fee calculator, upwork fee calculator, reverse fee calculator, freelance calculator">
+    <meta name="author" content="FeeCalc">
+    
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://feecalc.app/">
+    <meta property="og:title" content="FeeCalc - Instant Freelance & E-commerce Fee Calculator">
+    <meta property="og:description" content="Calculate your transaction fees in real-time. Supports Stripe, PayPal, and Upwork with a built-in reverse calculation feature.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=80">
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config for Dark Mode and Brand Colors -->
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+            theme: {
+                extend: {
+                    colors: {
+                        stripe: '#635BFF',
+                        paypal: '#003087',
+                        upwork: '#14A800',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease-out;
+        }
+        .accordion-active .accordion-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans antialiased transition-colors duration-300">
+
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">FeeCalc</span>
+            </div>
+            <nav>
+                <a href="#about" class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition">About Fees</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Calculator Section -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <div class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-4">Calculate Your Platform Fees</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Instantly see how much you'll take home after Stripe, PayPal, and Upwork deduct their transaction fees.</p>
+        </div>
+
+        <!-- Input Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8 max-w-2xl mx-auto mb-10">
+            <div class="flex flex-col md:flex-row items-center gap-6">
+                <div class="w-full relative">
+                    <label for="amount" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Transaction Amount ($)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500 dark:text-gray-400 text-lg">$</span>
+                        <input type="number" id="amount" value="100.00" min="0" step="0.01" class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-lg font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                    </div>
+                </div>
+
+                <!-- Toggle Switch -->
+                <div class="w-full md:w-auto flex flex-col justify-center mt-2 md:mt-0">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 text-center md:text-left">Calculation Mode</label>
+                    <label for="toggleMode" class="flex items-center cursor-pointer select-none">
+                        <div class="relative">
+                            <input type="checkbox" id="toggleMode" class="peer sr-only">
+                            <div class="block h-8 w-14 rounded-full bg-blue-600 dark:bg-blue-500 transition-colors"></div>
+                            <div class="dot absolute left-1 top-1 h-6 w-6 rounded-full bg-white transition-transform peer-checked:translate-x-6"></div>
+                        </div>
+                        <div class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300" id="toggleLabel">
+                            Standard (Gross to Net)
+                        </div>
+                    </label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 max-w-[200px]" id="toggleHelperText">Calculating how much you will receive after fees.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            
+            <!-- Stripe Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-t-4 border-stripe overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">Stripe</h2>
+                    <span class="text-xs font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 px-2 py-1 rounded">2.9% + 30¢</span>
+                </div>
+                <div class="p-6 flex-grow space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500 dark:text-gray-400" id="lbl-stripe-entered">Amount Entered</span>
+                        <span class="font-medium" id="val-stripe-gross">$100.00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-red-500 dark:text-red-400">
+                        <span class="text-sm">Platform Fee</span>
+                        <span class="font-medium" id="val-stripe-fee">-$3.20</span>
+                    </div>
+                    <div class="pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                        <span class="font-bold text-gray-900 dark:text-white" id="lbl-stripe-final">Final Received</span>
+                        <span class="text-2xl font-bold text-stripe" id="val-stripe-net">$96.80</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PayPal Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-t-4 border-paypal overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">PayPal</h2>
+                    <span class="text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-1 rounded">3.49% + 49¢</span>
+                </div>
+                <div class="p-6 flex-grow space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500 dark:text-gray-400" id="lbl-paypal-entered">Amount Entered</span>
+                        <span class="font-medium" id="val-paypal-gross">$100.00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-red-500 dark:text-red-400">
+                        <span class="text-sm">Platform Fee</span>
+                        <span class="font-medium" id="val-paypal-fee">-$3.98</span>
+                    </div>
+                    <div class="pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                        <span class="font-bold text-gray-900 dark:text-white" id="lbl-paypal-final">Final Received</span>
+                        <span class="text-2xl font-bold text-paypal" id="val-paypal-net">$96.02</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upwork Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-t-4 border-upwork overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">Upwork</h2>
+                    <span class="text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 px-2 py-1 rounded">Flat 10%</span>
+                </div>
+                <div class="p-6 flex-grow space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500 dark:text-gray-400" id="lbl-upwork-entered">Amount Entered</span>
+                        <span class="font-medium" id="val-upwork-gross">$100.00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-red-500 dark:text-red-400">
+                        <span class="text-sm">Platform Fee</span>
+                        <span class="font-medium" id="val-upwork-fee">-$10.00</span>
+                    </div>
+                    <div class="pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                        <span class="font-bold text-gray-900 dark:text-white" id="lbl-upwork-final">Final Received</span>
+                        <span class="text-2xl font-bold text-upwork" id="val-upwork-net">$90.00</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Content Section -->
+        <article id="about" class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 md:p-12 prose prose-blue dark:prose-invert max-w-none">
+            
+            <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Understanding Payment Platform Fees</h2>
+            <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-8">
+                Navigating the gig economy, freelancing, or running an e-commerce store requires a strong grasp of your profit margins. A significant factor that eats into your earnings is the transaction fees charged by payment gateways and freelance platforms. <strong>FeeCalc</strong> is designed to help you quickly understand exactly how much you are paying to platforms like Stripe, PayPal, and Upwork, allowing you to price your products or services accordingly.
+            </p>
+
+            <h3 class="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Detailed Breakdown of Fee Structures</h3>
+            
+            <div class="space-y-6 mb-10">
+                <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-xl border border-gray-100 dark:border-gray-800">
+                    <h4 class="text-xl font-bold text-stripe mb-2">Stripe: E-commerce & SaaS Standard</h4>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm md:text-base leading-relaxed">
+                        Stripe standard pricing for domestic credit and debit card transactions in the US is <strong>2.9% + $0.30</strong> per successful charge. However, if you process international cards, expect an additional 1.5% fee, plus another 1% if currency conversion is required.
+                    </p>
+                </div>
+                
+                <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-xl border border-gray-100 dark:border-gray-800">
+                    <h4 class="text-xl font-bold text-paypal mb-2">PayPal: The Consumer Favorite</h4>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm md:text-base leading-relaxed">
+                        For standard commercial transactions (PayPal Checkout), the domestic rate in the US is generally <strong>3.49% + $0.49</strong>. Standard PayPal invoicing or "Goods and Services" payments typically sit at 2.99% + $0.49.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-xl border border-gray-100 dark:border-gray-800">
+                    <h4 class="text-xl font-bold text-upwork mb-2">Upwork: Freelance Marketplace</h4>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm md:text-base leading-relaxed">
+                        Upwork operates on a <strong>flat 10% service fee</strong> across freelancer contracts, simplifying fee management compared to older tiered systems.
+                    </p>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Comparative Table: Domestic vs. International Fees</h3>
+            
+            <div class="overflow-x-auto mb-12">
+                <table class="w-full text-left border-collapse rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <thead class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+                        <tr>
+                            <th class="p-4 font-semibold border-b dark:border-gray-700">Platform</th>
+                            <th class="p-4 font-semibold border-b dark:border-gray-700">Standard Domestic Fee</th>
+                            <th class="p-4 font-semibold border-b dark:border-gray-700">International Surcharge</th>
+                            <th class="p-4 font-semibold border-b dark:border-gray-700">Currency Conversion</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-600 dark:text-gray-300">
+                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <td class="p-4 font-medium">Stripe</td>
+                            <td class="p-4">2.9% + $0.30</td>
+                            <td class="p-4">+1.5%</td>
+                            <td class="p-4">+1.0%</td>
+                        </tr>
+                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <td class="p-4 font-medium">PayPal</td>
+                            <td class="p-4">3.49% + $0.49</td>
+                            <td class="p-4">+1.5%</td>
+                            <td class="p-4">3.0% to 4.0% markup</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium">Upwork</td>
+                            <td class="p-4">Flat 10%</td>
+                            <td class="p-4">None (USD base)</td>
+                            <td class="p-4">Varies by bank</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- FAQ Section -->
+            <h3 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100">Frequently Asked Questions (FAQ)</h3>
+            
+            <div class="space-y-4 mb-10">
+                <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 bg-white dark:bg-gray-800 text-left focus:outline-none">
+                        <span class="font-semibold text-gray-900 dark:text-white">How does the "Reverse Calculation" toggle work?</span>
+                        <svg class="accordion-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content bg-gray-50 dark:bg-gray-900">
+                        <div class="p-5 text-gray-600 dark:text-gray-300 text-sm md:text-base border-t border-gray-200 dark:border-gray-700">
+                            The reverse calculator figures out exactly how much you need to invoice your client so that, after platform fees are deducted, you receive your desired net amount.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 bg-white dark:bg-gray-800 text-left focus:outline-none">
+                        <span class="font-semibold text-gray-900 dark:text-white">Does Upwork charge fees to the client as well?</span>
+                        <svg class="accordion-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content bg-gray-50 dark:bg-gray-900">
+                        <div class="p-5 text-gray-600 dark:text-gray-300 text-sm md:text-base border-t border-gray-200 dark:border-gray-700">
+                            Yes, Upwork charges clients a marketplace fee (typically 3%–5%) on top of the payment sent to freelancers, plus a contract initiation fee.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </article>
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const amountInput = document.getElementById('amount');
+        const toggleMode = document.getElementById('toggleMode');
+        const toggleLabel = document.getElementById('toggleLabel');
+        const toggleHelperText = document.getElementById('toggleHelperText');
+
+        // Calculator Logic
+        function calculateFees() {
+            const val = parseFloat(amountInput.value) || 0;
+            const isReverse = toggleMode.checked;
+
+            // Stripe: 2.9% + 0.30
+            let stripeGross, stripeFee, stripeNet;
+            if (!isReverse) {
+                stripeGross = val;
+                stripeFee = (stripeGross * 0.029) + 0.30;
+                stripeNet = Math.max(0, stripeGross - stripeFee);
+            } else {
+                stripeNet = val;
+                stripeGross = (stripeNet + 0.30) / (1 - 0.029);
+                stripeFee = stripeGross - stripeNet;
+            }
+
+            // PayPal: 3.49% + 0.49
+            let paypalGross, paypalFee, paypalNet;
+            if (!isReverse) {
+                paypalGross = val;
+                paypalFee = (paypalGross * 0.0349) + 0.49;
+                paypalNet = Math.max(0, paypalGross - paypalFee);
+            } else {
+                paypalNet = val;
+                paypalGross = (paypalNet + 0.49) / (1 - 0.0349);
+                paypalFee = paypalGross - paypalNet;
+            }
+
+            // Upwork: 10%
+            let upworkGross, upworkFee, upworkNet;
+            if (!isReverse) {
+                upworkGross = val;
+                upworkFee = upworkGross * 0.10;
+                upworkNet = Math.max(0, upworkGross - upworkFee);
+            } else {
+                upworkNet = val;
+                upworkGross = upworkNet / (1 - 0.10);
+                upworkFee = upworkGross - upworkNet;
+            }
+
+            // Update UI
+            document.getElementById('val-stripe-gross').innerText = '$' + stripeGross.toFixed(2);
+            document.getElementById('val-stripe-fee').innerText = '-$' + stripeFee.toFixed(2);
+            document.getElementById('val-stripe-net').innerText = '$' + stripeNet.toFixed(2);
+
+            document.getElementById('val-paypal-gross').innerText = '$' + paypalGross.toFixed(2);
+            document.getElementById('val-paypal-fee').innerText = '-$' + paypalFee.toFixed(2);
+            document.getElementById('val-paypal-net').innerText = '$' + paypalNet.toFixed(2);
+
+            document.getElementById('val-upwork-gross').innerText = '$' + upworkGross.toFixed(2);
+            document.getElementById('val-upwork-fee').innerText = '-$' + upworkFee.toFixed(2);
+            document.getElementById('val-upwork-net').innerText = '$' + upworkNet.toFixed(2);
+        }
+
+        // Toggle text updates
+        toggleMode.addEventListener('change', () => {
+            if (toggleMode.checked) {
+                toggleLabel.innerText = "Reverse (Net to Gross)";
+                toggleHelperText.innerText = "Calculating how much to charge to receive this exact amount.";
+                
+                document.getElementById('lbl-stripe-entered').innerText = "Target Received";
+                document.getElementById('lbl-stripe-final').innerText = "You Must Charge";
+                document.getElementById('lbl-paypal-entered').innerText = "Target Received";
+                document.getElementById('lbl-paypal-final').innerText = "You Must Charge";
+                document.getElementById('lbl-upwork-entered').innerText = "Target Received";
+                document.getElementById('lbl-upwork-final').innerText = "You Must Charge";
+            } else {
+                toggleLabel.innerText = "Standard (Gross to Net)";
+                toggleHelperText.innerText = "Calculating how much you will receive after fees.";
+                
+                document.getElementById('lbl-stripe-entered').innerText = "Amount Entered";
+                document.getElementById('lbl-stripe-final').innerText = "Final Received";
+                document.getElementById('lbl-paypal-entered').innerText = "Amount Entered";
+                document.getElementById('lbl-paypal-final').innerText = "Final Received";
+                document.getElementById('lbl-upwork-entered').innerText = "Amount Entered";
+                document.getElementById('lbl-upwork-final').innerText = "Final Received";
+            }
+            calculateFees();
+        });
+
+        // Accordion Interactivity
+        document.querySelectorAll('.accordion-header').forEach(button => {
+            button.addEventListener('click', () => {
+                const parent = button.parentElement;
+                const content = button.nextElementSibling;
+                
+                parent.classList.toggle('accordion-active');
+                if (parent.classList.contains('accordion-active')) {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                } else {
+                    content.style.maxHeight = 0;
+                }
+            });
+        });
+
+        // Event listener for inputs
+        amountInput.addEventListener('input', calculateFees);
+
+        // Run calculation on initial load
+        calculateFees();
+    </script>
+</body>
+</html>
