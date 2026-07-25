@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Sitemap: https://feecalc-akq.pages.dev/sitemap.xml
+
